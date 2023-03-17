@@ -1,0 +1,33 @@
+version: "3.9"
+services:
+  database:
+    build:
+      context: .
+      dockerfile: Dockerfile.sql
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    volumes:
+      - ${mysql_volume_name}:/var/lib/mysql
+  liferay:
+    build:
+      context: .
+      dockerfile: Dockerfile.lfr
+    ports:
+      - "8080:8080"
+      - "8000:8000"
+    environment:
+      - LIFERAY_JDPA_ENABLED=true
+      - JDPA_ADDRESS=8000
+      - JDPA_TRANSPORT=dt_socket
+    depends_on: 
+      database:
+        condition: service_completed_successfully
+    volumes:
+      - ${deploy_folder_project}:/opt/liferay/deploy
+      - ${liferay_volume_name}:/opt/liferay
+
+volumes:
+  ${mysql_volume_name}:
+  ${liferay_volume_name}:
